@@ -305,7 +305,7 @@ module cpu(
 			.Predicted(ex_mem_out[7]),
 			.Branch_Enable(ex_mem_out[73]),
 			.Jump(ex_mem_out[0]),
-			.Mistake(mistake_trigger),
+			.Mispredict(mistake_trigger),
 			.Decision(actual_branch_decision),
 			.Branch_Jump_Trigger(pcsrc)
 		);
@@ -448,4 +448,3 @@ module cpu(
 	assign regfile_read_address1 = inst_mux_out[24:20]; //if_id_out[56:52] //inst_mux_out[24:20]
 
 endmodule
-

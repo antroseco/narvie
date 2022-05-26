@@ -18,7 +18,7 @@ COMMON_MODULES	= 	$(SAIL)/verilog/mux2to1.v		$(SAIL)/verilog/alu_control.v		\
 			$(SAIL)/verilog/program_counter.v	$(SAIL)/verilog/branch_decide.v		\
 			$(SAIL)/verilog/forwarding_unit.v	$(SAIL)/verilog/branch_predictor.v	\
 			$(SAIL)/verilog/imm_gen.v		$(SAIL)/verilog/control_unit.v		\
-			$(SAIL)/verilog/adder.v			$(SAIL)/verilog/CSR_iCE40UP5K.v		\
+			$(SAIL)/verilog/adder.v			$(SAIL)/verilog/CSR.v			\
 			$(SAIL)/verilog/dataMem_mask_gen.v
 
 NARVIE_MODULES	= 	$(NARVIE_VERILOG)/cpu.v			$(NARVIE_VERILOG)/rx_instruction.v	\
@@ -53,18 +53,18 @@ $(VERILATOR_OUT)/libvnarvie.a:	$(VERILATOR_SRC)/top_sim.v		$(MODULES)				\
 		--cc $(VERILATOR_SRC)/main.cpp $(VERILATOR_SRC)/testbench.cpp $(VERILATOR_SRC)/uartsim.cpp \
 		--exe \
 		-Mdir $(VERILATOR_OUT) \
-		-CFLAGS "-std=c++11 -g -O3 -fPIC -Wall -Werror"
+		-CFLAGS "-std=c++11 -g -O3 -fPIC -Wall -Werror -include limits"
 
 	cd $(VERILATOR_OUT) && make -j -f Vnarvie.mk
 	cp $(VERILATOR_OUT)/Vnarvie__ALL.a $(VERILATOR_OUT)/libvnarvie.a
 	ar -q $(VERILATOR_OUT)/libvnarvie.a $(VERILATOR_OUT)/testbench.o $(VERILATOR_OUT)/uartsim.o $(VERILATOR_OUT)/verilated.o
 
-fpga/$(PROJECT).blif: fpga $(MODULES) $(NARVIE_VERILOG)/top.v Makefile
+fpga/$(PROJECT).json: fpga $(MODULES) $(NARVIE_VERILOG)/top.v Makefile
 	cd $(SAIL) && \
-	yosys -p "synth_ice40 -blif $(ROOT_DIR)/fpga/$(PROJECT).blif;" $(MODULES) $(NARVIE_VERILOG)/top.v
+	yosys -p "synth_ice40 -json $(ROOT_DIR)/fpga/$(PROJECT).json" $(MODULES) $(NARVIE_VERILOG)/top.v
 
-fpga/$(PROJECT).asc: ../$(PROJECT).pcf fpga/$(PROJECT).blif Makefile
-	arachne-pnr -d 5k -P uwg30 -p ../$(PROJECT).pcf ./fpga/$(PROJECT).blif -o fpga/$(PROJECT).asc
+fpga/$(PROJECT).asc: ../$(PROJECT).pcf fpga/$(PROJECT).json Makefile
+	nextpnr-ice40 --up5k --package uwg30 --json ./fpga/$(PROJECT).json --pcf ../$(PROJECT).pcf --asc fpga/$(PROJECT).asc
 
 fpga/$(PROJECT).bin: fpga/$(PROJECT).asc Makefile
 	icepack fpga/$(PROJECT).asc fpga/$(PROJECT).bin
@@ -78,4 +78,3 @@ burn: fpga/$(PROJECT).bin
 
 clean:
 	rm -rf fpga $(VERILATOR_OUT)
-

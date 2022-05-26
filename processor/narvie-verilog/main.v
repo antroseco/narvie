@@ -73,5 +73,4 @@ module main(clk12, led, tx, rx);
 			.regfile_read_data0(regfile_read_data0),
 			.regfile_read_data1(regfile_read_data1)
 		);
-
 endmodule
