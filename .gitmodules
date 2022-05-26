@@ -1,6 +1,7 @@
 [submodule "RV32I-common"]
 	path = processor/sail
 	url = https://github.com/physical-computation/Sail-RV32I-common
+	ignore = dirty
 [submodule "FPGA-peripherals"]
 	path = processor/peripherals
 	url = https://github.com/FPGAwars/FPGA-peripherals
